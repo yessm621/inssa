@@ -107,7 +107,7 @@ $(function(){
 						data: {formData : JSON.stringify(arr)},
 						dataType: "json",
 						success: function(){
-							console.log("insert success");
+							//console.log("insert success");
 						}
 					});
 				}

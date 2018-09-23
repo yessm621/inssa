@@ -223,7 +223,7 @@
 		/* 주문하기 */
 		$("#btnBuy").click(function(){
 			var count = $("#count").val();
-			console.log(count);
+			//console.log(count);
 			var arr = new Array();
 			var obj = new Object();
 			for(var i=0; i<count; i++){
@@ -236,7 +236,7 @@
 				arr.push(obj);
 			}
 			var product_info = JSON.stringify(arr);
-			console.log(product_info);
+			//console.log(product_info);
 			
 			$("input[name=arr]").val(product_info);
 			

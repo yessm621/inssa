@@ -93,7 +93,7 @@ function email_auth(type) {
 			dataType : "json",
 			success : function(d) {
 				ajax_running = false;
-				console.log(d);
+				//console.log(d);
 				if(d.exist == 0) {
 					alert("등록된 이메일이 없습니다.");
 					return;
@@ -120,7 +120,7 @@ function email_auth(type) {
 					alert("인증코드 전송이 실패하였습니다.");
 				}
 			}, error : function(e) {
-				console.log(e);
+				//console.log(e);
 			}
 		});
 	} else {
@@ -162,13 +162,13 @@ function compare_auth_code() {
 				data : { "email" : email },
 				dataType : "json",
 				success : function(d) {
-					console.log(d);
+					//console.log(d);
 					var idInfo = "<div class='child_opener'><h3 class='m-t-60 m-b-20'>아이디 찾기</h3><div class='p-l-15'>";
 					idInfo += "<div class='bo12 size6 m-b-20 p-t-15' style='text-align:center;'>고객님의 아이디는 '<span style='color: #E65540;'>"+d.ID+"</span>' 입니다.</div></div></div>";
 					$(".child_opener").remove();
 					$(".col-md-10").append(idInfo);
 				}, error : function(e) {
-					console.log(e);
+					//console.log(e);
 				}
 			});
 		}

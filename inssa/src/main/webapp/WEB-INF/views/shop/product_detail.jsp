@@ -107,7 +107,7 @@
 					data: {formData : JSON.stringify(arr)},
 					dataType: "json",
 					success: function(){
-						console.log("insert success");
+						//console.log("insert success");
 					}
 				});
 				
@@ -128,19 +128,19 @@
 			$('a[href$='+tab+']').trigger("click");
 		});
 		function detailImg(){
-			console.log("detailImg");
+			//console.log("detailImg");
 			$("#detailImg").show();
 			$("#proReview").hide();
 			$("#proQna").hide();
 		}
 		function proReview(){
-			console.log("proReview");
+			//console.log("proReview");
 			$("#detailImg").hide();
 			$("#proReview").show();
 			$("#proQna").hide();
 		}
 		function proQna(){
-			console.log("proQna");
+			//console.log("proQna");
 			$("#detailImg").hide();
 			$("#proReview").hide();
 			$("#proQna").show();
@@ -356,7 +356,7 @@ $(function(){
 						data: {formData : JSON.stringify(arr)},
 						dataType: "json",
 						success: function(){
-							console.log("insert success");
+							//console.log("insert success");
 						}
 					});
 				}

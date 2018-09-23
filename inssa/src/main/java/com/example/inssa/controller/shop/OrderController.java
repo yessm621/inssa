@@ -185,7 +185,6 @@ public class OrderController {
 		String[] pro_price_list = product_price.split("_");
 		
 		for(int i=0; i<pro_code_list.length; i++) {
-			//System.out.println(order_idx + "__" + pro_code_list[i] + "__" + pro_amount_list[i] + "__" + pro_price_list[i] + "__" + pro_color_list[i] + "__" + member_id);
 			orderService.orderForm_insert(order_idx, pro_code_list[i], pro_amount_list[i], pro_price_list[i], pro_color_list[i], member_id);
 		}
 		
@@ -224,8 +223,7 @@ public class OrderController {
 	}
 	
 	@RequestMapping("buyDel.do")
-	public String buyDel(int idx) {		
-		System.out.println("idx::"+idx);
+	public String buyDel(int idx) {	
 		orderService.buyDel(idx);
 		
 		return "redirect:/shop/order/buyList";

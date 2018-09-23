@@ -8,9 +8,7 @@
 	<script>
 		$(document).on('click', 'li.p-t-4 a', function(){
 			var idx = $(this).index('li.p-t-4 a');
-			console.log(idx);
-			console.log($("li.p-t-4 a:eq("+idx+")").text());
-			//$("li.p-t-4 a").removeClass("s-text13 active1");
+		
 			$("li.p-t-4 a:eq("+idx+")").removeClass("s-text13");
 			$("li.p-t-4 a:eq("+idx+")").addClass("s-text13 active1");
 		});
@@ -26,9 +24,7 @@
 			
 			$(document).on('click', 'button#btnAddCart.flex-c-m.size1.bg4.bo-rad-23.hov1.s-text1.trans-0-4', function(){
 				var idx = $(this).index('button#btnAddCart.flex-c-m.size1.bg4.bo-rad-23.hov1.s-text1.trans-0-4');
-				console.log("idx::"+idx);
 				var pro_code = $("input#pro_code:eq("+idx+")").val();
-				console.log("pro_code::"+pro_code);
 				var data = {"pro_code" : pro_code};
 				
 				var member_id = "${sessionScope.member_id}";
@@ -53,7 +49,7 @@
 								data: {formData : JSON.stringify(arr)},
 								dataType: "json",
 								success: function(){
-									console.log("insert success");
+									//console.log("insert success");
 								}
 							});
 						}

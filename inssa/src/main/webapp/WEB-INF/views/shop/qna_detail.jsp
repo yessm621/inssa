@@ -132,14 +132,11 @@ $(function(){
 	//첨부파일 삭제
 	$("#uploadedList").on("click", ".file_del", function(e){
 		var that=$(this);//클릭한 태그
-		console.log(that);
 		var btnName = $("#btnUpdate").text();
 		if(btnName.indexOf("완료") < 0){
-			console.log("view");
 			alert("수정 버튼 클릭 후 이미지를 삭제해주세요.");
 			return;
 		}else{
-			console.log("수정화면");
 			$.ajax({
 				type: "post",
 				url: "${path}/upload/deleteFile",

@@ -83,7 +83,7 @@ var social_type = "";
 	      // 로그인 창을 띄웁니다.
 	      Kakao.Auth.login({
 	        success: function(res) {
-	        	console.log(res);
+	        	//console.log(res);
 				var id = JSON.stringify(res.id);
 				social_type = "kakao";
 				//var name = JSON.stringify(res.properties.nickname);

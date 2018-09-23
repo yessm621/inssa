@@ -185,7 +185,7 @@ var social_type = "";
 			Kakao.API.request({
 				url: '/v1/user/me',
 				success: function(res) {
-					console.log(res);
+					//console.log(res);
 					var id = JSON.stringify(res.id);
 					social_type = "kakao";
 					//var name = JSON.stringify(res.properties.nickname);

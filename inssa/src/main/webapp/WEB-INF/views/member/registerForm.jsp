@@ -89,7 +89,7 @@ $(function() {
 				type : "post",
 				dataType : "json",
 				success : function(d) {
-					console.log(d);
+					//console.log(d);
 				 	var $toastContainer = $('#toast-container');
 					var $errorToastr = $toastContainer.find('.toast-success');
 				
@@ -233,9 +233,9 @@ $(function() {
 		var auth_second = auth_time % 60;
 		
 		if(auth_second.toString().length < 2) {
-			console.log("auth_second.length", auth_second.toString().length);
+			//console.log("auth_second.length", auth_second.toString().length);
 			auth_second = "0" + auth_second.toString();
-			console.log("auth_second" , auth_second);
+			//console.log("auth_second" , auth_second);
 		}
 		
 		if(auth_time == 0) {
@@ -280,7 +280,7 @@ $(function() {
 					type : "post",
 					dataType : "json",
 					success : function(d) {
-						console.log(d);
+						//console.log(d);
 						//가입되어 있으면 d 는 1
 						if (d == 0) {
 							is_email_overlap  = false;
@@ -330,7 +330,7 @@ $(function() {
 			dataType : "json",
 			success : function(d) {
 				ajax_running = false;
-				console.log(d);
+				//console.log(d);
 				if(d.sendChk == 1) {
 					//인증번호
 					randomCode = d.randomCode;
@@ -354,7 +354,7 @@ $(function() {
 				}
 			},
 			error : function(e) {
-				console.log(e);
+				//console.log(e);
 			}
 		});
 	}

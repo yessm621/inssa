@@ -93,7 +93,7 @@ function email_auth(type) {
 			dataType : "json",
 			success : function(d) {
 				ajax_running = false;
-				console.log(d);
+				//console.log(d);
 				if(d.exist == 0) {
 					alert("등록된 이메일이 없습니다.");
 					return;
@@ -120,7 +120,7 @@ function email_auth(type) {
 					alert("인증코드 전송이 실패하였습니다.");
 				}
 			}, error : function(e) {
-				console.log(e);
+				//console.log(e);
 			}
 		});
 	} else {
@@ -236,7 +236,7 @@ function modifyPwd() {
 				is_email_auth = false;
 				pwChk = false;
 			}, error : function(e) {
-				console.log(e);
+				//console.log(e);
 			}
 		});
 	}

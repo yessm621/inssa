@@ -13,16 +13,16 @@ function checkImageType(fileName){
 }
 function getFileInfo(fullName){
 	var fileName, imgsrc, getLink, fileLink;
-	if(checkImageType(fullName)){ //이미지 파일인 경우
+	if(checkImageType(fullName)){ 
 		imgsrc="/inssa/upload/displayFile?fileName="+fullName;
-		fileLink=fullName.substr(3); //14 인덱스~끝
+		fileLink=fullName.substr(3); 
 		var end=fullName.substr(3);
 		getLink="/inssa/upload/displayFile?fileName=/"+end;
 	}else{
 		alert("이미지를 등록해주세요.");
 		return;
 	}
-	// uuid_filename
+	
 	fileName=fileLink.substr(fileLink.indexOf("_")+1);
 	return {fileName: fileName, imgsrc: imgsrc,
 			getLink: getLink, fullName:fullName };
@@ -50,17 +50,17 @@ function listAttach(){
 	})
 }
 $(function(){
-	//드래그 기본효과 막음
+
 	$(".fileDrop").on("dragenter dragover", function(e){
 		e.preventDefault();
 	});
 	$(".fileDrop").on("drop", function(e){
 		e.preventDefault();
-		//드롭한 파일을 폼데이터에 추가함
+
 		var files = e.originalEvent.dataTransfer.files;
 		var file = files[0];
 		var formData = new FormData();
-		//폼데이터에 추가(아래의 form태그안에 input태그를 사용한 것이 아니기 때문에 form태그와 따로 놀게되므로 formData를 선언해줌)
+		
 		formData.append("file", file);
 		$.ajax({
 			url: "${path}/upload/uploadAjax",
@@ -80,23 +80,23 @@ $(function(){
 	});
 	
 	$("#btnUpdate").click(function(){
-		//태그.each( function(){} ) 모든 태그 반복
+		
 		var str = "";
 		$("#uploadedList .file").each(function(i){
 			str += "<input type='hidden' name='files["+i+"]' value='"+$(this).val()+"'>";
 		});
-		//폼에 hidden 태그들을 추가
+		
 		$("#form1").append(str);
 		
 		document.form1.action="${path}/shop/product/review_modify.do";
 		document.form1.submit();
 	});
 	
-	listAttach();//첨부파일 목록 로딩
+	listAttach();
 	
-	//첨부파일 삭제
+	
 	$("#uploadedList").on("click", ".file_del", function(e){
-		var that=$(this);//클릭한 태그
+		var that=$(this);
 		$.ajax({
 			type: "post",
 			url: "${path}/upload/deleteFile",

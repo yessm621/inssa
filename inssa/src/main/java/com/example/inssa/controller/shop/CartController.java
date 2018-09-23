@@ -32,9 +32,6 @@ public class CartController {
 	@ResponseBody
 	public String cart_insert(HttpServletRequest req, HttpSession session, Model model) {
 		
-		System.out.println("*****************************");
-		System.out.println(req.getParameter("formData"));
-		
 		String userid = (String) session.getAttribute("member_id");
 		if(userid != null) {	
 			String data = req.getParameter("formData");

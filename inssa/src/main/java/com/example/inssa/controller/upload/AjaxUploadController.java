@@ -56,23 +56,19 @@ public class AjaxUploadController {
 		FileInputStream in = null;
 		ResponseEntity<byte[]> entity = null;
 		try {
-			//파일의 확장자 검사
-			//test.jpg	 a.b.c.d.jpg
-			String formatName = fileName.substring(fileName.lastIndexOf(".")+1);//확장자=>jpg
+			String formatName = fileName.substring(fileName.lastIndexOf(".")+1);
 			MediaType mType = MediaUtils.getMediaType(formatName);
-			//헤더를 생성
+
 			HttpHeaders headers = new HttpHeaders();
 			in = new FileInputStream(uploadPath+fileName);
-			if(mType != null) {//이미지 파일인 경우
+			if(mType != null) {
 				headers.setContentType(mType);
-			}else {//이미지 파일이 아닌 경우
-				fileName = fileName.substring(fileName.indexOf("_")+1);//uuid를 제외한 파일 이름
-				headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);//컨텐트 타입
-				//파일이름에 한글이 들어간 경우
-				//스트링.getBytes("언어셋") 스트링을 바이트 배열로 변환
-				//new String (바이트배열, "언어셋") 문자열의 인코딩 변경
+			}else {
+				fileName = fileName.substring(fileName.indexOf("_")+1);
+				headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
 				fileName = new String(fileName.getBytes("utf-8"), "iso-8859-1");
-				headers.add("Content-Disposition", "attachment; filename=\""+fileName+"\"");//첨부파일 정보
+				headers.add("Content-Disposition", "attachment; filename=\""+fileName+"\"");
 			}
 			entity = new ResponseEntity<byte[]>(IOUtils.toByteArray(in), headers, HttpStatus.OK);
 		}catch (Exception e) {
@@ -90,13 +86,13 @@ public class AjaxUploadController {
 	public ResponseEntity<String> deleteFile(String fileName){
 		String formatName = fileName.substring(fileName.lastIndexOf(".")+1);
 		MediaType mType = MediaUtils.getMediaType(formatName);
-		if(mType != null) {//이미지 파일의 경우
+		if(mType != null) {
 			String front = fileName.substring(0, 1);
 			String end = fileName.substring(3);
-			new File(uploadPath+(front+end).replace('/', File.separatorChar)).delete();//이미지일땐 그냥 파일 먼저 삭제한 후
+			new File(uploadPath+(front+end).replace('/', File.separatorChar)).delete();
 		}
-		new File(uploadPath+fileName.replace('/', File.separatorChar)).delete();//파일 삭제(이미지는 썸네일 파일 삭제)
-		//레코드 삭제
+		new File(uploadPath+fileName.replace('/', File.separatorChar)).delete();
+		
 		productService.deleteFile(fileName);
 		
 		return new ResponseEntity<String>("deleted", HttpStatus.OK);

@@ -12,44 +12,42 @@ $(function(){
 		event.preventDefault();
 	});
 	$(".fileDrop").on("drop",function(event){
-		//drop이 될 때 기본 효과를 막음
+		
 		event.preventDefault();
-		//첨부파일 배열
+		
 		var files=event.originalEvent.dataTransfer.files;
-		var file=files[0]; //첫번째 첨부파일
-		var formData=new FormData(); //폼 객체
-		formData.append("file",file); //폼에 file 변수 추가
-		//서버에 파일 업로드(백그라운드에서 실행됨)
+		var file=files[0]; 
+		var formData=new FormData();
+		formData.append("file",file);
+		
 		$.ajax({
 			type: "post",
 			url: "${path}/upload/uploadAjax",
 			data: formData,
 			dataType: "text",
-			processData: false,//processData: false => post 방식(파일을 어떻게 보낼건지)
-			contentType: false,// contentType: false => multipart/form-data로 처리됨
+			processData: false,
+			contentType: false,
 			success: function(data,status,req){
-				console.log("data:"+data); //업로드된 파일 이름
-				console.log("status:"+status); //성공,실패 여부
-				console.log("req:"+req.status);//요청코드값
+				
 				var str="";
-				if(checkImageType(data)){ //이미지 파일
+				if(checkImageType(data)){
 					str="<div><a href='${path}/upload/displayFile?fileName="+getImageLink(data)+"'>";
 					str+="<img src='${path}/upload/displayFile?fileName="+data+"'></a>";
 					str+="<input type='hidden' class='file' value='"+data+"'>";
-				}else{ //이미지가 아닌 경우
+				}else{
 					alert("이미지를 등록해주세요.");
 					return;
 				}
 				str+="<span data-src="+data+">[삭제]</span></div>";
-				$(".uploadedList").append(str);//class="uploadedList"인 곳에 추가한다.
+				$(".uploadedList").append(str);
 			}
 		});
-	}); //fileDrop 함수
-	//첨부파일 삭제 함수
+	});
+	
 	$(".uploadedList").on("click","span",function(event){
-		//현재 클릭한 태그
+		
 		var that=$(this);
-		//data: "fileName="+$(this).attr("data-src"),		
+		
 		$.ajax({
 			url: "${path}/upload/deleteFile",
 			type: "post",
@@ -66,28 +64,28 @@ $(function(){
 	});
 	
 	function getOriginalName(fileName){
-		if(checkImageType(fileName)){ //이미지 파일이면 skip
+		if(checkImageType(fileName)){ 
 			return;
 		}
-		var idx=fileName.indexOf("_")+1; //uuid를 제외한 파일이름
+		var idx=fileName.indexOf("_")+1;
 		return fileName.substr(idx);
 	}
 	function getImageLink(fileName){
-		if(!checkImageType(fileName)){//이미지 파일이 아니면 skip
-			return;//함수 종료
+		if(!checkImageType(fileName)){
+			return;
 		}
-		//이미지 파일이면
+		
 		var front=fileName.substr(0,1);
-		var end=fileName.substr(3);// s_ 제거
+		var end=fileName.substr(3);
 
 		return front+end;
 	}
 	function checkImageType(fileName){
-		var pattern=/jpg|png|jpeg/i; //정규표현식(대소문자 무시)
-		return fileName.match(pattern); //규칙에 맞으면 true
+		var pattern=/jpg|png|jpeg/i;
+		return fileName.match(pattern);
 	}
 	$("#btnSave").click(function(){
-		//태그.each( function(){} ) 모든 태그 반복
+		
 		var title = $("#title").val();
 		
 		if(title == ""){
@@ -99,7 +97,7 @@ $(function(){
 		$(".uploadedList .file").each(function(i){
 			str += "<input type='hidden' name='files["+i+"]' value='"+$(this).val()+"'>";
 		});
-		//폼에 hidden 태그들을 추가
+		
 		$("#form1").append(str);
 		document.form1.submit();
 	});

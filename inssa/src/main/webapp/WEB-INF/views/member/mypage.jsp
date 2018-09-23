@@ -332,7 +332,7 @@ $(function(){
 			});
 		},
 		error : function(e) {
-			console.log(e);
+			//console.log(e);
 		}
 	}); 
 	
@@ -354,7 +354,7 @@ $(function(){
 				success : function(d) {
 					alert("연결이 해지되었습니다.");
 					$(".social_link_a:eq(" + idx +")").removeClass("social_linked");
-					console.log($(this).text());
+					//console.log($(this).text());
 					$(".social_link_a:eq(" + idx +")").text("연결하기");
 					Kakao.Auth.logout();
 				}
@@ -367,7 +367,7 @@ $(function(){
 		        	Kakao.API.request({
 						url: '/v1/user/me',
 						success: function(res) {
-							console.log(res);
+							//console.log(res);
 							var id = JSON.stringify(res.id);
 							social_type = "kakao";
 							var social_linked = false;
