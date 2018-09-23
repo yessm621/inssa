@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="review">
+	<select id="review_list" resultType="com.example.inssa.model.review.dto.ReviewDTO">
+		SELECT R.IDX R_IDX, MEMBER_ID, TITLE, CONTENT, PRODUCT_CODE, VIEW_CNT, R.CREATED_TIME R_CREATED_TIME, R.MODIFIED_TIME R_MODIFIED_TIME, BOARD_SHOW,
+				F.IDX F_IDX, ORIGINAL_NAME, MODIFIED_NAME, BOARD_TYPE, BOARD_IDX, F.CREATED_TIME F_CREATED_TIME, F.MODIFIED_TIME F_MODIFIED_TIME
+		FROM BOARD_REVIEW R, BOARD_FILE F 
+		WHERE R.IDX = F.BOARD_IDX 
+		AND PRODUCT_CODE=#{code} and BOARD_TYPE='R' 
+		ORDER BY R.IDX DESC
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

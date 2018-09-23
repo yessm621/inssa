@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="cart">
+	<insert id="cart_insert">
+		INSERT INTO CART (PRODUCT_CODE, MEMBER_ID, AMOUNT, PRODUCT_COLOR) 
+		VALUES (#{var1},#{userid},#{var3},#{var2})
+	</insert>
+	<select id="cart_list" resultType="com.example.inssa.model.shop.dto.CartDTO">
+		SELECT A.IDX, P.CODE PCODE, P.NAME PNAME, PRICE, SALE_PRICE, THUMB_IMG, PRODUCT_COLOR PRO_OPTION, CATEGORY, MEMBER_ID, MEMBER_NAME, AMOUNT, SALE_PRICE*AMOUNT MONEY 
+		FROM PRODUCT P,
+			(SELECT M.ID MEMBER_ID, M.NAME MEMBER_NAME, C.PRODUCT_CODE, C.AMOUNT, C.IDX, C.PRODUCT_COLOR 
+			FROM MEMBER M, CART C 
+			WHERE M.ID=C.MEMBER_ID AND C.MEMBER_ID=#{userid}) A 
+		WHERE P.CODE=A.PRODUCT_CODE 
+	</select>
+	<update id="cart_update">
+		UPDATE CART
+		SET AMOUNT=#{amount}
+		WHERE IDX=#{idx}
+	</update>
+	<select id="cart_check" resultType="int">
+		SELECT COUNT(*) FROM CART
+		WHERE PRODUCT_CODE=#{var1} AND PRODUCT_COLOR=#{var2} AND MEMBER_ID = #{userid}
+	</select>
+	<update id="cart_add_modify">
+		UPDATE CART
+		SET AMOUNT=AMOUNT+#{var3}
+		WHERE PRODUCT_CODE=#{var1} AND PRODUCT_COLOR=#{var2} AND MEMBER_ID = #{userid}
+	</update>
+	<select id="getProductMoney" resultType="int">
+		SELECT COALESCE(SUM(AMOUNT*SALE_PRICE),0) 
+		FROM CART C, PRODUCT P 
+		WHERE C.PRODUCT_CODE=P.CODE 
+		AND MEMBER_ID=#{userid}
+	</select>
+	<delete id="cart_all_delete">
+		DELETE FROM CART
+		WHERE MEMBER_ID=#{userid}
+	</delete>
+	<delete id="cart_delete">
+		DELETE FROM CART 
+		WHERE IDX=#{idx} AND MEMBER_ID=#{userid}
+	</delete>
+	<select id="option_list" resultType="String">
+		SELECT COLOR PRO_OPTION FROM PRODUCT WHERE CODE = #{pro_code}
+	</select>
+	<update id="option_change">
+		UPDATE CART 
+		SET PRODUCT_COLOR = #{option}
+		WHERE IDX = #{cart_idx}
+	</update>
+	<select id="cartCnt" resultType="int">
+		SELECT COUNT(*) FROM CART WHERE MEMBER_ID = #{member_id}
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

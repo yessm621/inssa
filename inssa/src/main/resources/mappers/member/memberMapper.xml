@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="member">
+	<select id="getSocialNumber" resultType="Integer">
+				SELECT 
+							COALESCE(MAX(IDX),0) 
+				FROM 
+							MEMBER_SOCIAL
+	</select>
+	
+	<select id="isRegitstChk" resultType="Integer">
+				SELECT 
+							EXISTS
+										(SELECT 
+													ID 
+										 FROM 
+										 			MEMBER_SOCIAL 
+										 WHERE 
+										 			ID=#{id} 
+										 	  AND 
+										 	  		TYPE=#{type}
+										 	 )
+	</select>
+	
+	<select id="isExistMemberId" resultType="Integer">
+			    SELECT EXISTS(SELECT ID FROM MEMBER WHERE ID = #{member_id})
+	</select>
+	
+	<select id="isExistMemberEmail" resultType="Integer">
+				SELECT EXISTS(SELECT EMAIL FROM MEMBER WHERE EMAIL = #{email})
+	</select>
+	
+	<insert id="insertMember" useGeneratedKeys="true" keyProperty="idx">
+				INSERT INTO MEMBER  (
+												ID,
+												PASSWD,
+												NAME,
+												BIRTH, 
+												GENDER, 
+												POSTCODE, 
+												ADDR, 
+												DETAIL_ADDR, 
+												EMAIL, PHONE)
+									VALUES (
+												#{member_id}, 
+								    			#{passwd}, 
+								    			#{name}, 
+								    			DATE_FORMAT(STR_TO_DATE(concat(#{birth_year},'-',#{birth_month},'-', #{birth_day}),'%Y-%m-%d'),'%Y%m%d'), 
+								    			#{gender} , 
+								    			#{postcode}, 
+								    			#{addr}, 
+								    			#{detail_addr} , 
+								    			concat(#{email_type1}, '@', #{email_type2}), 
+								    			#{phone})
+	</insert> 
+	
+	<insert id="insertSocialMember"  useGeneratedKeys="true" keyProperty="idx">
+				INSERT INTO MEMBER_SOCIAL (ID, TYPE, MEMBER_ID) VALUES(#{social_id}, #{social_type}, #{member_id})
+	</insert>
+	
+	<select id="selectMemberId" resultType="java.lang.Integer">
+				SELECT EXISTS(SELECT ID FROM MEMBER WHERE ID = #{member_id})
+	</select>
+	
+	<select id="selectMemberPwd" resultType="java.lang.Integer">
+	 			SELECT EXISTS(SELECT ID FROM MEMBER WHERE ID = #{member_id} AND PASSWD = #{passwd})
+	</select>
+	
+	<select id="selectMemberIdBySocialId" resultType="java.lang.String">
+				SELECT MEMBER_ID FROM MEMBER_SOCIAL WHERE ID = #{social_id} AND TYPE = #{social_type}
+	</select>
+	
+	<select id="selectMemberIdByEmail" resultType="java.util.Map">
+				SELECT ID FROM MEMBER WHERE EMAIL = #{email}
+	</select>
+	
+	<update id="updatePwdByEmail">
+				UPDATE MEMBER SET PASSWD = #{pwd} WHERE EMAIL = #{email}
+	</update>
+	
+	<resultMap type="java.util.Map" id="memberMap">
+		<result column="ID" property="id"/>
+		<result column="NAME" property="name"/>
+		<result column="BIRTH" property="birth"/>
+		<result column="GENDER" property="gender"/>
+		<result column="POSTCODE" property="postcode"/>
+		<result column="ADDR" property="addr"/>
+		<result column="DETAIL_ADDR" property="detail_addr"/>
+		<result column="EMAIL" property="email"/>
+		<result column="PHONE" property="phone"/>
+	</resultMap>
+	
+	<select id="selectMemberInfo" resultMap="memberMap">
+				SELECT 
+							ID,
+							NAME,
+							BIRTH,
+							GENDER,
+							POSTCODE,
+							ADDR,
+							DETAIL_ADDR,
+							EMAIL,
+							PHONE
+				FROM
+							MEMBER
+				WHERE
+							ID = #{member_id}			
+	</select>
+	
+	<update id="updateMemberInfo">
+				UPDATE 
+							MEMBER 
+				SET 
+						PASSWD = #{passwd},
+						NAME = #{name},
+						BIRTH = DATE_FORMAT(STR_TO_DATE(concat(#{birth_year},'-',#{birth_month},'-', #{birth_day}),'%Y-%m-%d'),'%Y%m%d'),
+						GENDER = #{gender},
+						POSTCODE = #{postcode},
+						ADDR = #{addr},
+						DETAIL_ADDR = #{detail_addr},
+						EMAIL = concat(#{email_type1}, '@', #{email_type2}),
+						PHONE = #{phone}
+				WHERE 
+							ID =#{member_id}		
+	</update>
+	
+	<select id="selectMemberSocialInfo" resultType="java.util.Map">
+				SELECT 
+					       SC.NAME, 
+					       SC.TYPE, 
+					       CASE WHEN MS.MEMBER_ID IS NULL
+					       THEN 0
+					       WHEN MS.MEMBER_ID IS NOT NULL
+					       THEN 1
+					       END
+					       AS EXIST
+				FROM 
+				       SOCIAL_CLASSIFITAION SC
+				LEFT OUTER JOIN
+				       MEMBER_SOCIAL MS
+				ON SC.TYPE = MS.TYPE
+				AND MS.MEMBER_ID = #{member_id}
+	</select>
+	
+	<insert id="insertSocialLink">
+				INSERT  INTO 
+									MEMBER_SOCIAL (ID, TYPE , MEMBER_ID) 
+							VALUES 
+									(#{social_id} , #{social_type}, #{member_id})								
+	</insert>
+	
+	<insert id="deleteSocialLink">
+				DELETE  FROM 
+									MEMBER_SOCIAL 
+							WHERE 
+										TYPE =  #{social_type}
+										AND MEMBER_ID =  #{member_id}								
+	</insert>
+	<delete id="memberDel">
+		DELETE FROM MEMBER WHERE ID = #{member_id}
+	</delete>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

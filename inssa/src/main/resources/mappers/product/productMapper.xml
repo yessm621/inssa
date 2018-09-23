@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="product">
+	<!-- 상품리스트 -->
+	<select id="product_list" resultType="com.example.inssa.model.shop.dto.ProductDTO">
+		SELECT
+		    ROWNUM, IDX, CODE, NAME, PRICE, SALE_PRICE, THUMB_IMG, CATEGORY 
+		FROM
+		(
+		    SELECT
+		        @ROWNUM := @ROWNUM + 1 AS ROWNUM,
+		        PRODUCT.* 
+		    FROM
+		        PRODUCT,
+		       (SELECT @ROWNUM := 0) R 
+		       WHERE CATEGORY LIKE CONCAT('%',#{type},'%') 
+		       <include refid="search" />
+		       <include refid="sorting" />
+		) A
+		WHERE ROWNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	<!-- 상품정렬 -->
+	<sql id="sorting">
+		<choose>
+			<when test="sorting != null and sorting.equals('saleOrder')">
+				ORDER BY CNT DESC
+			</when>
+			<when test="sorting != null and sorting.equals('highPriceOrder')">
+				ORDER BY SALE_PRICE DESC
+			</when>
+			<when test="sorting != null and sorting.equals('lowPriceOrder')">
+				ORDER BY SALE_PRICE
+			</when>
+			<otherwise>
+				ORDER BY CREATED_TIME DESC
+			</otherwise>
+		</choose>
+	</sql>
+	<!-- 상품검색 -->
+	<sql id="search">
+		AND NAME LIKE CONCAT('%', #{search_product} ,'%') 
+	</sql>
+	<!-- 상품갯수 -->
+	<select id="listCnt" resultType="int">
+		SELECT COUNT(*)
+		FROM PRODUCT
+		WHERE CATEGORY LIKE CONCAT('%',#{type},'%') 
+		<include refid="search" />
+	</select>
+	<select id="getCategory" resultType="com.example.inssa.model.shop.dto.ProductDTO">
+		SELECT M.IDX C_IDX, H.NAME HIGH_NAME, H.CODE HIGH_CODE, M.NAME MIDDLE_NAME, M.CODE MIDDLE_CODE, concat(H.CODE, "_", M.CODE) C_CATEGORY
+		FROM CATEGORY_HIGH H, CATEGORY_MIDDLE M 
+		WHERE H.CODE = M.CATEGORY_HIGH_CODE
+		AND H.CODE = #{type}
+	</select>
+	<select id="category" resultType="String">
+		SELECT CATEGORY FROM PRODUCT WHERE CODE = #{pro_code}
+	</select>
+	<select id="catename" resultType="String">
+		SELECT NAME FROM CATEGORY_HIGH WHERE CODE = #{cate}
+	</select>
+	<select id="subname" resultType="String">
+		SELECT NAME FROM CATEGORY_MIDDLE WHERE CODE = #{subcate}
+	</select>
+	<select id="product_view" resultType="com.example.inssa.model.shop.dto.ProductDTO">
+		SELECT IDX, CODE, NAME, PRICE,SALE_PRICE, COLOR, THUMB_IMG, DETAIL_IMG 
+		FROM PRODUCT 
+		WHERE CODE=#{code}
+	</select>
+	<select id="related_list" resultType="com.example.inssa.model.shop.dto.ProductDTO">
+		SELECT
+			ROWNUM, IDX, CODE, NAME, PRICE, SALE_PRICE, THUMB_IMG, CATEGORY 
+		FROM
+		(
+		    SELECT
+		        @ROWNUM := @ROWNUM + 1 AS ROWNUM,
+		        PRODUCT.* 
+		    FROM
+		        PRODUCT,
+		       (SELECT @ROWNUM := 0) R 
+		       WHERE CATEGORY LIKE CONCAT('%', #{type} ,'%') 
+		       AND NOT CODE = #{pro_code}
+               ORDER BY CNT DESC
+		) A
+		WHERE ROWNUM BETWEEN 1 AND 12
+	</select>
+	<select id="productColor" resultType="String">
+		SELECT COLOR FROM PRODUCT WHERE CODE = #{pro_code}
+	</select>
+	
+
+	<select id="review_list" resultType="com.example.inssa.model.shop.dto.ProductDTO">
+		SELECT 
+			ROWNUM, 
+		    BOARD_IDX, 
+		    MEMBER_ID, 
+		    MEMBER_NAME, 
+		    A.CODE, 
+            A.COLOR,
+		    NAME, 
+		    THUMB_IMG, 
+		    A.TITLE, 
+		    CONTENT, 
+		    BOARD_SHOW, 
+		    BOARD_CREATED_TIME, 
+		    BOARD_MODIFIED_TIME 
+		FROM 
+			(SELECT 
+				B.*, 
+				M.NAME MEMBER_NAME 
+			FROM 
+				(SELECT 
+					@ROWNUM := @ROWNUM + 1 AS ROWNUM, 
+					IDX BOARD_IDX, 
+					MEMBER_ID, 
+					PRODUCT_CODE CODE, 
+					PRODUCT_COLOR COLOR, 
+					TITLE, CONTENT, 
+					REVIEW_SHOW BOARD_SHOW, 
+					CREATED_TIME BOARD_CREATED_TIME, 
+					MODIFIED_TIME BOARD_MODIFIED_TIME
+				FROM 
+					BOARD_REVIEW R, 
+					(SELECT @ROWNUM := 0) N 
+				WHERE PRODUCT_CODE=#{pro_code} AND REVIEW_SHOW = 'N' ORDER BY IDX DESC) B, MEMBER M 
+			WHERE B.MEMBER_ID = M.ID) A, PRODUCT P 
+		WHERE A.CODE = P.CODE 
+		AND ROWNUM BETWEEN #{startRow} AND #{endRow} ORDER BY ROWNUM
+			
+		<!-- rownum 매겨야함   변수는 pro_code, startRow, endRow -->
+	</select>
+	<select id="file_list" resultType="com.example.inssa.model.shop.dto.ProductDTO">
+		SELECT IDX FILE_IDX, ORIGINAL_NAME, MODIFIED_NAME, BOARD_IDX FILE_BOARD_IDX 
+		FROM BOARD_FILE 
+		WHERE BOARD_TYPE=#{board_type} AND BOARD_IDX=#{board_idx} AND PRODUCT_CODE=#{pro_code}
+	</select>
+	<select id="proBuyCheck" resultType="int">
+		SELECT COUNT(*) FROM ORDER_FORM WHERE MEMBER_ID=#{member_id} AND PRODUCT_CODE=#{pro_code}
+	</select>
+	<select id="review_requiredInfo" resultType="com.example.inssa.model.shop.dto.ProductDTO">
+		SELECT CODE, A.NAME, THUMB_IMG, PRODUCT_COLOR COLOR, MEMBER_ID, M.NAME MEMBER_NAME FROM MEMBER M,
+			(SELECT CODE, NAME, THUMB_IMG, PRODUCT_COLOR, MEMBER_ID 
+			FROM PRODUCT P,
+				(SELECT PRODUCT_CODE, PRODUCT_COLOR, MEMBER_ID 
+				FROM ORDER_FORM 
+				WHERE PRODUCT_CODE = #{pro_code} AND MEMBER_ID = #{member_id}) F 
+			WHERE P.CODE=F.PRODUCT_CODE) A 
+		WHERE M.ID=A.MEMBER_ID
+	</select>
+	<insert id="review_insert">
+		INSERT INTO BOARD_REVIEW (MEMBER_ID, PRODUCT_CODE, TITLE, CONTENT, PRODUCT_COLOR) 
+		VALUES (#{member_id},#{code},#{title},#{content},#{color})
+	</insert>
+	<select id="maxReviewIdx" resultType="int">
+		SELECT MAX(IDX) BOARD_IDX FROM BOARD_REVIEW WHERE REVIEW_SHOW = 'N'
+	</select>
+	<insert id="addAttach">
+		INSERT INTO BOARD_FILE (ORIGINAL_NAME, MODIFIED_NAME, BOARD_TYPE, BOARD_IDX, PRODUCT_CODE) 
+		VALUES (#{original_name}, #{modified_name}, #{board_type}, #{board_idx}, #{code})
+	</insert>
+	
+	<select id="review_modify_list" resultType="com.example.inssa.model.shop.dto.ProductDTO">
+		SELECT CODE,A.NAME,BOARD_IDX,MEMBER_ID,M.NAME MEMBER_NAME, TITLE,CONTENT,PRODUCT_COLOR COLOR FROM MEMBER M,
+			(SELECT P.CODE,P.NAME,BOARD_IDX,MEMBER_ID,TITLE,CONTENT,PRODUCT_COLOR FROM PRODUCT P, 
+				(SELECT IDX BOARD_IDX, MEMBER_ID, PRODUCT_CODE CODE, TITLE, CONTENT, PRODUCT_COLOR 
+				FROM BOARD_REVIEW WHERE PRODUCT_CODE=#{pro_code} AND IDX=#{board_idx}) B
+			WHERE P.CODE=B.CODE) A 
+		WHERE M.ID=A.MEMBER_ID
+	</select>
+	<select id="file_modify_list" resultType="com.example.inssa.model.shop.dto.ProductDTO">
+		SELECT IDX FILE_IDX, ORIGINAL_NAME
+		FROM BOARD_FILE 
+		WHERE PRODUCT_CODE=#{pro_code} 
+		AND BOARD_IDX=#{board_idx} AND BOARD_TYPE=#{board_type}
+	</select>
+	
+	<update id="review_modify">
+		UPDATE BOARD_REVIEW
+		SET TITLE=#{title}, CONTENT=#{content}
+		WHERE IDX=#{idx} AND PRODUCT_CODE=#{code} AND MEMBER_ID=#{member_id}
+	</update>
+	<select id="checkOriginalName" resultType="int">
+		SELECT COUNT(*) FROM BOARD_FILE WHERE ORIGINAL_NAME=#{name} AND BOARD_IDX=#{idx}
+	</select>
+	<delete id="deleteFile">
+		DELETE FROM BOARD_FILE WHERE ORIGINAL_NAME=#{fileName}
+	</delete>
+	<update id="review_delete">
+		UPDATE BOARD_REVIEW
+		SET REVIEW_SHOW = 'Y'
+		WHERE IDX=#{board_idx} AND PRODUCT_CODE=#{pro_code}
+	</update>
+	<delete id="deleteAttach">
+		DELETE FROM BOARD_FILE WHERE BOARD_IDX=#{board_idx} AND PRODUCT_CODE=#{pro_code} AND BOARD_TYPE = #{board_type}
+	</delete>
+	<select id="totalPage" resultType="int">
+		SELECT COUNT(*) FROM BOARD_REVIEW WHERE PRODUCT_CODE=#{pro_code} AND REVIEW_SHOW = 'N'
+	</select>
+	
+	<select id="qna_list" resultType="com.example.inssa.model.shop.dto.ProductDTO">
+		SELECT 
+			ROWNUM,
+		    IDX BOARD_IDX, 
+			MEMBER_ID, 
+			PRODUCT_CODE CODE, 
+			TITLE, 
+			VIEW_CNT, 
+			QNA_SHOW BOARD_SHOW, 
+			CREATED_TIME BOARD_CREATED_TIME, 
+			MODIFIED_TIME BOARD_MODIFIED_TIME 
+		FROM
+		(
+			SELECT
+				@ROWNUM := @ROWNUM + 1 AS ROWNUM,
+				BOARD_QNA.* 
+			FROM
+				BOARD_QNA,
+				(SELECT @ROWNUM := 0) R 
+				WHERE PRODUCT_CODE=#{pro_code} AND QNA_SHOW = 'N' ORDER BY IDX DESC
+		) A 
+		WHERE ROWNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	<select id="qnaListCnt" resultType="int">
+		SELECT COUNT(*) FROM BOARD_QNA WHERE PRODUCT_CODE=#{pro_code} AND QNA_SHOW = 'N'
+	</select>
+	<select id="qna_detail" resultType="com.example.inssa.model.shop.dto.ProductDTO">
+		SELECT 
+			BOARD_IDX,
+		    MEMBER_ID, 
+		    MEMBER_NAME,
+			B.CODE, 
+		    P.NAME, 
+			TITLE, 
+			CONTENT, 
+			VIEW_CNT, 
+			BOARD_CREATED_TIME, 
+			BOARD_MODIFIED_TIME
+		FROM
+			(SELECT 
+				Q.IDX BOARD_IDX, 
+				MEMBER_ID, 
+				M.NAME MEMBER_NAME,
+				PRODUCT_CODE CODE, 
+				TITLE, 
+				CONTENT, 
+				VIEW_CNT, 
+				Q.CREATED_TIME BOARD_CREATED_TIME, 
+				Q.MODIFIED_TIME BOARD_MODIFIED_TIME
+			FROM 
+				(SELECT * FROM BOARD_QNA WHERE PRODUCT_CODE = #{pro_code} AND QNA_SHOW = 'N' AND IDX = #{board_idx}) Q, 
+		        MEMBER M 
+		        WHERE Q.MEMBER_ID=M.ID) B, 
+		        PRODUCT P 
+			WHERE B.CODE=P.CODE
+	</select>
+	<update id="increaseViewcnt">
+		UPDATE BOARD_QNA
+		SET VIEW_CNT = VIEW_CNT+1
+		WHERE IDX = #{board_idx}
+	</update>
+	<update id="qna_modify">
+		UPDATE BOARD_QNA
+		SET TITLE = #{title}, CONTENT = #{content}
+		WHERE IDX = #{board_idx}
+	</update>
+	<insert id="qna_insert">
+		INSERT INTO BOARD_QNA (MEMBER_ID, PRODUCT_CODE, TITLE, CONTENT) 
+		VALUES (#{member_id},#{code},#{title},#{content})
+	</insert>
+	<select id="maxQnaIdx" resultType="int">
+		SELECT MAX(IDX) BOARD_IDX FROM BOARD_QNA WHERE QNA_SHOW = 'N'
+	</select>
+	<update id="qna_delete">
+		UPDATE BOARD_QNA
+		SET QNA_SHOW = 'Y'
+		WHERE IDX = #{board_idx} AND PRODUCT_CODE = #{pro_code}
+	</update>
+	<update id="deleteReply">
+		UPDATE REPLY
+		SET SHOW_TYPE = 'Y'
+		WHERE BOARD_IDX = #{board_idx} AND PRODUCT_CODE = #{pro_code}
+	</update>
+	<select id="qnaList" resultType="com.example.inssa.model.shop.dto.ProductDTO">
+		SELECT  
+			CODE,
+		    NAME, 
+		    THUMB_IMG,
+		    Q.IDX BOARD_IDX,
+		    MEMBER_ID,
+		    TITLE,
+		    VIEW_CNT, 
+		    QNA_SHOW BOARD_SHOW,
+		    Q.MODIFIED_TIME BOARD_MODIFIED_TIME
+		FROM 
+			PRODUCT P,
+			(SELECT 
+				* 
+			FROM 
+				BOARD_QNA 
+			WHERE MEMBER_ID = #{member_id} AND QNA_SHOW = 'N') Q 
+		WHERE P.CODE = Q.PRODUCT_CODE
+	</select>
+	<update id="review_memberDel">
+		UPDATE BOARD_REVIEW
+		SET REVIEW_SHOW = 'Y'
+		WHERE MEMBER_ID = #{member_id}
+	</update>
+	<update id="qna_memberDel">
+		UPDATE BOARD_QNA
+		SET QNA_SHOW = 'Y'
+		WHERE MEMBER_ID = #{member_id}
+	</update>
+	
+	
+	<!-- 메인화면 베스트 -->
+	<select id="main_best" resultType="com.example.inssa.model.shop.dto.ProductDTO">
+		SELECT
+		    ROWNUM, IDX, CODE, NAME, PRICE, SALE_PRICE, THUMB_IMG, CATEGORY 
+		FROM
+		(
+		    SELECT
+		        @ROWNUM := @ROWNUM + 1 AS ROWNUM,
+		        PRODUCT.* 
+		    FROM
+		        PRODUCT,
+		       (SELECT @ROWNUM := 0) R 
+		       WHERE CATEGORY LIKE CONCAT('%', #{type} ,'%') 
+		) A
+		WHERE ROWNUM BETWEEN 1 AND 8
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

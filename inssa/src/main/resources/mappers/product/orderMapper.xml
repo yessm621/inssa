@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="order">
+	<select id="product_list" resultType="com.example.inssa.model.shop.dto.OrderDTO">
+		SELECT CODE PRODUCT_CODE, NAME PRODUCT_NAME, PRICE, SALE_PRICE, THUMB_IMG 
+		FROM PRODUCT WHERE CODE=#{product_code}
+	</select>
+	<select id="shipping_list" resultType="com.example.inssa.model.shop.dto.OrderDTO">
+		SELECT MEMBER_ID, RECIPIENT, POSTCODE SHIPPING_POSTCODE, ADDR SHIPPING_ADDR, DETAIL_ADDR SHIPPING_DETAIL_ADDR, PHONE, ALIAS 
+		FROM SHIPPING_PLACE 
+		WHERE MEMBER_ID=#{member_id} AND IDX=#{default_num}
+	</select>
+	<select id="shipping_check" resultType="int">
+		SELECT COUNT(*) FROM SHIPPING_PLACE WHERE MEMBER_ID=#{member_id}
+	</select>
+	<insert id="shipping_insert">
+		INSERT INTO SHIPPING_PLACE (MEMBER_ID, POSTCODE, ADDR, DETAIL_ADDR, ALIAS, PHONE, RECIPIENT) 
+		VALUES (#{member_id},#{shipping_postcode},#{shipping_addr},#{shipping_detail_addr},#{alias},#{phone},#{recipient})
+	</insert>
+	<select id="shipping_default_num" resultType="int">
+		SELECT MIN(IDX) FROM SHIPPING_PLACE WHERE MEMBER_ID=#{member_id}
+	</select>
+	<select id="memberInfo" resultType="com.example.inssa.model.shop.dto.OrderDTO">
+		SELECT ID MEMBER_ID, NAME RECIPIENT, POSTCODE SHIPPING_POSTCODE, ADDR SHIPPING_ADDR, DETAIL_ADDR SHIPPING_DETAIL_ADDR, PHONE 
+		FROM MEMBER WHERE ID=#{member_id}
+	</select>
+	<select id="alias_list" resultType="com.example.inssa.model.shop.dto.OrderDTO">
+		SELECT IDX SHIPPING_IDX, ALIAS FROM SHIPPING_PLACE WHERE MEMBER_ID=#{member_id}
+	</select>
+	<select id="aliasFind" resultType="com.example.inssa.model.shop.dto.OrderDTO">
+		SELECT MEMBER_ID, RECIPIENT, POSTCODE SHIPPING_POSTCODE, ADDR SHIPPING_ADDR, DETAIL_ADDR SHIPPING_DETAIL_ADDR, PHONE, ALIAS 
+		FROM SHIPPING_PLACE WHERE MEMBER_ID=#{member_id} AND ALIAS=#{alias} AND IDX=#{shipping_idx}
+	</select>
+	
+	
+	<!-- order_insert.do -->
+	<select id="memberPhone" resultType="String">
+		SELECT PHONE FROM MEMBER WHERE ID=#{member_id}
+	</select>
+	<insert id="order_insert">
+		INSERT INTO ORDER_LIST (
+								MEMBER_ID, 
+								STATUS, 
+								PAYMENT_METHOD, 
+								PAYMENT_NAME, 
+								PAYMENT_ACCOUNT, 
+								PAYMENT_BANK, 
+								PAYMENT_PHONE, 
+								PAYMENT_PRICE, 
+								RECIPIENT, 
+								SHIPPING_POSTCODE, 
+								SHIPPING_ADDR, 
+								SHIPPING_DETAIL_ADDR
+								) 
+						VALUES (
+								#{member_id},
+								#{status},
+								#{payment_method},
+								#{payment_name},
+								#{payment_account},
+								#{payment_bank},
+								#{payment_phone},
+								#{payment_price},
+								#{recipient},
+								#{shipping_postcode},
+								#{shipping_addr},
+								#{shipping_detail_addr}
+								)
+	</insert>
+	<select id="order_idx_max" resultType="int">
+		SELECT COALESCE(MAX(IDX), 1) FROM ORDER_LIST
+	</select>
+	<insert id="orderForm_insert">
+		INSERT INTO ORDER_FORM (ORDER_IDX, PRODUCT_CODE, PRODUCT_AMOUNT, PRODUCT_PRICE, PRODUCT_COLOR, MEMBER_ID) 
+		VALUES (#{order_idx},#{product_code},#{product_amount},#{product_price},#{product_color},#{member_id})
+	</insert>
+	<select id="order_list" resultType="com.example.inssa.model.shop.dto.OrderDTO">
+		SELECT IDX, MEMBER_ID, STATUS, PAYMENT_METHOD, PAYMENT_NAME, PAYMENT_ACCOUNT, PAYMENT_BANK, PAYMENT_PHONE, 
+		PAYMENT_PRICE, RECIPIENT, SHIPPING_POSTCODE, SHIPPING_ADDR, SHIPPING_DETAIL_ADDR, CREATED_TIME
+		FROM ORDER_LIST
+		WHERE MEMBER_ID=#{member_id} AND IDX=#{order_idx}
+	</select>
+	<select id="order_form" resultType="com.example.inssa.model.shop.dto.OrderDTO">
+		SELECT ORDER_IDX, PRODUCT_CODE, PRODUCT_AMOUNT, PRODUCT_PRICE, PRODUCT_COLOR, NAME PRODUCT_NAME
+		FROM ORDER_FORM F, PRODUCT P 
+		WHERE F.PRODUCT_CODE = P.CODE 
+		AND MEMBER_ID=#{member_id} AND ORDER_IDX=#{order_idx}
+	</select>
+	<select id="buy_list" resultType="com.example.inssa.model.shop.dto.OrderDTO">
+		SELECT 
+			IDX,  
+			MEMBER_ID,
+		    STATUS, 
+		    PAYMENT_METHOD, 
+		    PAYMENT_NAME,
+		    PAYMENT_ACCOUNT, 
+		    PAYMENT_BANK, 
+		    PAYMENT_PHONE, 
+		    PAYMENT_PRICE, 
+		    RECIPIENT, 
+		    SHIPPING_POSTCODE, 
+		    SHIPPING_ADDR, 
+		    SHIPPING_DETAIL_ADDR, 
+		    CREATED_TIME,
+		    DEL 
+		FROM 
+			ORDER_LIST 
+		WHERE MEMBER_ID = #{member_id} ORDER BY IDX DESC
+	</select>
+	<select id="buy_detail_list" resultType="com.example.inssa.model.shop.dto.OrderDTO">
+		SELECT 
+		    O.IDX,
+			ORDER_IDX,
+		    PRODUCT_CODE,
+		    PRODUCT_AMOUNT,
+		    PRODUCT_PRICE, 
+		    PRODUCT_COLOR,
+		    MEMBER_ID,
+		    NAME PRODUCT_NAME,
+		    THUMB_IMG
+		FROM PRODUCT P,
+			(SELECT 
+				*
+			FROM 
+				ORDER_FORM
+			WHERE MEMBER_ID = #{member_id} ORDER BY ORDER_IDX DESC) O 
+		WHERE P.CODE = O.PRODUCT_CODE
+	</select>
+	<update id="buyDel">
+		UPDATE ORDER_LIST
+		SET DEL = 'Y'
+		WHERE IDX = #{idx}
+	</update>
+	<select id="countIdx" resultType="com.example.inssa.model.shop.dto.OrderDTO">
+		SELECT ORDER_IDX, COUNT(ORDER_IDX) COUNT_IDX FROM ORDER_FORM 
+		WHERE MEMBER_ID = #{member_id} group by ORDER_IDX ORDER BY ORDER_IDX DESC
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

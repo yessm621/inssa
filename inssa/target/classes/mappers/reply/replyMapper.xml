@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="reply">
+	<select id="replyName" resultType="String">
+		SELECT NAME FROM MEMBER WHERE ID = #{replyer}
+	</select>
+	<insert id="reply_insert">
+		INSERT INTO REPLY (BOARD_IDX, PRODUCT_CODE, REPLYTEXT, REPLYER, NAME) 
+		VALUES (#{board_idx}, #{product_code}, #{replytext}, #{replyer}, #{name})
+	</insert>
+	<select id="replyList" resultType="com.example.inssa.model.reply.dto.ReplyDTO">
+		SELECT 
+			IDX REPLY_IDX, 
+			BOARD_IDX, 
+			PRODUCT_CODE, 
+			REPLYTEXT, 
+			REPLYER, NAME, 
+			SHOW_TYPE,
+			CREATED_TIME,
+			MODIFIED_TIME 
+		FROM REPLY 
+		WHERE BOARD_IDX = #{board_idx} 
+			AND PRODUCT_CODE = #{pro_code} 
+		ORDER BY IDX DESC
+	</select>
+	<update id="reply_update">
+		UPDATE REPLY
+		SET REPLYTEXT = #{replytext}, MODIFIED_TIME = #{modified_time}
+		WHERE IDX = #{reply_idx} AND BOARD_IDX = #{board_idx}
+	</update>
+	<select id="reply_view" resultType="com.example.inssa.model.reply.dto.ReplyDTO">
+		SELECT 
+			IDX REPLY_IDX, 
+			BOARD_IDX, 
+			PRODUCT_CODE, 
+			REPLYTEXT, 
+			REPLYER, NAME, 
+			SHOW_TYPE,
+			CREATED_TIME, 
+			MODIFIED_TIME
+		FROM REPLY 
+		WHERE IDX = #{reply_idx} AND BOARD_IDX = #{board_idx}
+	</select>
+	<update id="reply_delete">
+		UPDATE REPLY
+		SET SHOW_TYPE = #{show_type}
+		WHERE IDX = #{reply_idx} AND BOARD_IDX = #{board_idx}
+	</update>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
